@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100 p-8">
+    <div class="max-w-md mx-auto bg-white p-6 rounded shadow-md">
+        <h1 class="text-2xl font-bold mb-4">与 Agent 聊天</h1>
+        <input type="text" id="user-input" class="border border-gray-300 p-2 w-full mb-4" placeholder="输入你的消息">
+        <button id="send-button" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">发送</button>
+        <div id="chat-responses" class="mt-4">
+            <!-- 聊天回复将显示在这里 -->
+        </div>
+    </div>
+
+    <script>
+        const sendButton = document.getElementById('send-button');
+        const userInput = document.getElementById('user-input');
+        const chatResponses = document.getElementById('chat-responses');
+
+        sendButton.addEventListener('click', async () => {
+            const message = userInput.value;
+            if (message) {
+                const data = {
+                    "bot_id": "7497970613215658020",
+                    "user_id": "123123123",
+                    "stream": false,
+                    "auto_save_history": true,
+                    "additional_messages": [
+                        {
+                            "role": "user",
+                            "content": message,
+                            "content_type": "text"
+                        }
+                    ]
+                };//data的格式是API自己规定好的，需要查看他的API文档
+
+                try {
+                    const response = await fetch('/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    if (result.replies) {
+                        result.replies.forEach(reply => {
+                            const p = document.createElement('p');
+                            p.textContent = reply;
+                            chatResponses.appendChild(p);
+                        });
+                    } else {
+                        const p = document.createElement('p');
+                        p.textContent = `错误: ${result.error}`;
+                        chatResponses.appendChild(p);
+                    }
+                } catch (error) {
+                    const p = document.createElement('p');
+                    p.textContent = `网络错误: ${error.message}`;
+                    chatResponses.appendChild(p);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
